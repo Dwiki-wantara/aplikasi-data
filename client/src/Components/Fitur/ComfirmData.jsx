@@ -1,19 +1,13 @@
 import React, { useState } from "react";
-import { API } from "../config/API";
+import { API } from "../../config/API";
 
-export default function Modal({
-  confirm,
-  setConfirm,
-  del,
-  setDel,
-  id,
-  refetch,
-}) {
+export default function Confirm({ modalDelete, setModalDelete, DeleteData, id, refetch}){
   let handleDelete = async () => {
     await API.delete(`/users/${id}`);
     refetch();
-    setConfirm(false);
+    setModalDelete(!modalDelete);
   };
+  
   return (
     <>
       <div className="w-full h-full bg-slate-500 opacity-50 fixed z-20"></div>
@@ -23,17 +17,10 @@ export default function Modal({
         </div>
         <div className="flex flex-row justify-end mr-10">
           <div className="flex w-36 gap-2">
-            <button
-              type="submit"
-              className="bg-blue-600 px-5 py-2 text-slate-50 font-semibold rounded-xl"
-              onClick={handleDelete}
-            >
+            <button type="submit" className="bg-blue-600 px-5 py-2 text-slate-50 font-semibold rounded-xl" onClick={handleDelete}>
               Hapus
             </button>
-            <button
-              className="border-orange-600 px-5 py-2 bg-white text-dark-600 font-semibold rounded-xl"
-              onClick={() => (setConfirm(!confirm), setDel(false))}
-            >
+            <button className="border-orange-600 px-5 py-2 bg-white text-dark-600 font-semibold rounded-xl" onClick={() => (setModalDelete(!modalDelete), DeleteData(false))}>
               Batal
             </button>
           </div>

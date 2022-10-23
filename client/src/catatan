@@ -1,0 +1,271 @@
+import "./App.css";
+import { FaFolder, FaUserPlus } from "react-icons/fa";
+import Modal from "./Components/AddData";
+import { useState } from "react";
+import { useQuery, useMutation } from "react-query";
+import { API } from "./config/API";
+import ModalUpdate from "./Components/UpdateData";
+import ConfirmModal from "./Components/ComfirmData";
+import DetailModal from "./Components/DetailData";
+
+function App() {
+
+
+
+  const [dataMap, setDataMap] = useState("");
+
+  const [formName, setFormName] = useState({ 
+    nik:"",
+    name: "",
+  });
+
+  const handleChangeName = (e) => {
+    setFormName({
+      ...formName,
+      [e.target.name]: e.target.value.toLowerCase(),
+    });
+  };
+  
+  const handleSubmitName = (e) => {
+      e.preventDefault();
+      setDataMap(formName.name);
+  };
+
+
+  const [dataSearch, setQ] = useState("");
+  
+  const [formNik, setFormNik] = useState({ 
+    nik:"",
+    name: "",
+  });
+
+  const handleChangeNik = (e) => {
+    setFormNik({
+      ...formNik,
+      [e.target.name]: e.target.value.toLowerCase(),
+    });
+  };
+  
+  const handleSubmitNik = (e) => {
+      e.preventDefault();
+      setQ(formNik.nik);
+  };
+
+  
+  const [formUpdate, setFormUpdate] = useState(false);
+  const [modal, setModal] = useState(false);
+  const [confirm, setConfirm] = useState(false);
+  const [del, setDel] = useState(false);
+  const [detail, setDetail] = useState(false);
+  const [id, setId] = useState();
+
+  let { data: users, refetch } = useQuery("users", async () => {
+    const response = await API.get("/users");
+    return response.data;
+  });
+
+  let handleDelete = (id) => {
+    setConfirm(!confirm);
+    setId(id);
+  };
+
+  let handleDetail = (id) => {
+    setDetail(!detail);
+    setId(id);
+  };
+
+  let handleUpdate = async (id) => {
+    setFormUpdate(!formUpdate);
+    setId(id);
+  };
+
+  function getAge(dateString) {
+    var today = new Date();
+    var birthDate = new Date(dateString);
+    var age = today.getFullYear() - birthDate.getFullYear();
+    var m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  }
+
+  const [searchParam] = useState(["nik", "name"]);
+
+  function searchTerm(e) {
+    return e.filter((item) => {
+      return searchParam.some((newItem) => {
+        return (
+          item[newItem].toString().toLowerCase().indexOf(dataSearch.toLowerCase()) > -1
+        );
+      });
+    });
+  }
+
+  // console.log(q);
+  let daata;
+  let usernik;
+  if (users?.length > 0) {
+    daata = Object.values(users);
+    usernik = searchTerm(daata);
+  }
+  console.log(usernik);
+
+  return (
+    <>
+      {detail && <DetailModal id={id} age={getAge} setModal={setDetail} />}
+      {confirm && (
+        <ConfirmModal
+          confirm={confirm}
+          setConfirm={setConfirm}
+          del={del}
+          setDel={setDel}
+          id={id}
+          refetch={refetch}
+        />
+      )}
+      {modal && <Modal modal={modal} setModal={setModal} />}
+      {formUpdate && <ModalUpdate id={id} formUpdate={formUpdate} setFormUpdate={setFormUpdate} />}
+      <div className="p-7">
+        <h1 className="flex items-center gap-3 font-bold text-2xl">
+          <FaFolder size={50} /> Aplikasi Data Pribadi
+        </h1>
+        <div className="flex flex-col  bg-orange-50 px-6 py-10 mt-7 rounded-xl" style={{backgroundColor:"#FFE1E1"}}>
+          <div className="flex flex-col ">
+            <label htmlFor="nik">NIK</label>
+            <div>
+              <input id="nik" name="nik" type="number" placeholder="search..." style={{width:"30%",padding:"10px"}} onChange={handleChangeNik}/>
+              <button className="bg-blue-700" style={{marginLeft:"10px", padding:"10px 50px", color:"white", borderRadius:"5px"}} onClick={handleSubmitNik}>Cari</button>
+            </div>
+            
+          </div>
+
+          <div className="flex flex-col" style={{marginTop:"10px"}}>
+            <label htmlFor="name">Name</label>
+            <div>
+              <input id="name" name="name" type="text" placeholder="search..." style={{width:"30%",padding:"10px"}} onChange={handleChangeName} />
+              <button  className="bg-blue-700" style={{marginLeft:"10px", padding:"10px 50px", color:"white", borderRadius:"5px"}} onClick={handleSubmitName}>Cari</button>
+            </div>
+            
+          </div>
+
+        </div>
+        <div className="flex justify-end m-4">
+          <button
+            className="flex items-center gap-2 bg-blue-700 text-white px-8 py-2 rounded-lg  hover:bg-orange-800"
+            onClick={() => setModal(!modal)}
+          >
+            <FaUserPlus size={20} /> Add
+          </button>
+        </div>
+        <div className="overflow-x-auto rounded-md border">
+          <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 ">
+            <thead className="uppercase dark:bg-blue-700 text-white">
+              <tr>
+                <th scope="col" className="py-3 px-6" style={{border:"1px solid black"}}>
+                  nik
+                </th>
+                <th scope="col" className="py-3 px-6" style={{border:"1px solid black"}}>
+                  nama lengkap
+                </th>
+                <th scope="col" className="py-3 px-6" style={{border:"1px solid black"}}>
+                  umur
+                </th>
+                <th scope="col" className="py-3 px-6" style={{border:"1px solid black"}}>
+                  tanggal lahir
+                </th>
+                <th scope="col" className="py-3 px-6" style={{border:"1px solid black"}}>
+                  jenis kelamin
+                </th>
+                <th scope="col" className="py-3 px-6" style={{border:"1px solid black"}}>
+                  alamat
+                </th>
+                <th scope="col" className="py-3 px-6" style={{border:"1px solid black"}}>
+                  negara
+                </th>
+                <th scope="col" className="py-3 px-6" style={{border:"1px solid black"}}> 
+                  action
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {dataMap ? (
+                users
+                  ?.filter((asd) => asd.name.toLowerCase().includes(dataMap))
+                  .map((item, key) => (
+                    <tr key={key} >
+                      <td className="py-4 px-6" style={{border:"1px solid black"}}>{item.nik}</td>
+                      <td className="py-4 px-6" style={{border:"1px solid black"}}>{item.name}</td>
+                      <td className="py-4 px-6" style={{border:"1px solid black"}}>{getAge(item.date)}</td>
+                      <td className="py-4 px-6" style={{border:"1px solid black"}}>{item.date}</td>
+                      <td className="py-4 px-6" style={{border:"1px solid black"}}>{item.gender}</td>
+                      <td className="py-4 px-6 w-44" style={{border:"1px solid black"}}>{item.address}</td>
+                      <td className="py-4 px-6" style={{border:"1px solid black"}}>{item.country}</td>
+                      <td className="py-4 px-6 flex flex-row items-center gap-2" style={{border:"1px solid black", height:"110px"}}>
+                        <div
+                          className="cursor-pointer text-blue-500 hover:text-blue-600 font-semibold hover:underline"
+                          onClick={() => handleDetail(item.nik)}
+                        >
+                          Detail
+                        </div>
+                        <div
+                          className="cursor-pointer text-yellow-500 hover:text-yellow-600 font-semibold hover:underline"
+                          onClick={() => handleUpdate(item.nik)}
+                        >
+                          Edit
+                        </div>
+                        <div
+                          className="cursor-pointer text-red-500 hover:text-red-600 font-semibold hover:underline"
+                          onClick={() => handleDelete(item.nik)}
+                        >
+                          Delete
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+              ) : usernik?.length > 0 ? (
+                usernik?.map((item, k) => (
+                  <tr key={k}>
+                    <td className="py-4 px-6"  style={{border:"1px solid black"}}>{item.nik}</td>
+                    <td className="py-4 px-6"  style={{border:"1px solid black"}}>{item.name}</td>
+                    <td className="py-4 px-6"  style={{border:"1px solid black"}}>{getAge(item.date)}</td>
+                    <td className="py-4 px-6"  style={{border:"1px solid black"}}>{item.date}</td>
+                    <td className="py-4 px-6"  style={{border:"1px solid black"}}>{item.gender}</td>
+                    <td className="py-4 px-6 w-44"  style={{border:"1px solid black"}}>{item.address}</td>
+                    <td className="py-4 px-6"  style={{border:"1px solid black"}}>{item.country}</td>
+                    <td className="py-4 px-6 flex  items-center"  style={{border:"1px solid black", height:"110px"}}>
+                      <div
+                        className="cursor-pointer text-blue-500 hover:text-blue-600 font-semibold hover:underline"
+                        onClick={() => handleDetail(item.nik)}
+                      >
+                        Detail
+                      </div>
+                      <div
+                        className="cursor-pointer text-yellow-500 hover:text-yellow-600 font-semibold hover:underline"
+                        onClick={() => handleUpdate(item.nik)}
+                      >
+                        Edit
+                      </div>
+                      <div
+                        className="cursor-pointer text-red-500 hover:text-red-600 font-semibold hover:underline"
+                        onClick={() => handleDelete(item.nik)}
+                      >
+                        Delete
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <>
+                  <div>DATA YANG ANDA CARI KOSONG</div>
+                </>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </>
+  );
+}
+
+export default App;
